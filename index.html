@@ -76,9 +76,14 @@
         .interpretation-title {
             font-weight: bold;
             font-size: 18px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             display: block;
             color: #2c3e50;
+        }
+
+        /* ВОТ ЭТО ИСПРАВЛЯЕТ "КАШУ" ИЗ ТЕКСТА */
+        .interpretation-description {
+            white-space: pre-wrap; /* Сохраняет переносы строк как в базе */
         }
     </style>
 </head>
@@ -100,14 +105,18 @@
     </div>
 
     <script>
-        // 1. НАСТРОЙКИ SUPABASE (Исправлено создание клиента)
-        const SB_URL = "https://cfxywxzrihguvcokacgw.supabase.co";
-        const SB_KEY = "sb_publishable_qWwvrriEOPMUdgfjdOnmOA__U2RrkRU";
-        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        // 1. НАСТРОЙКИ SUPABASE
+        const SUPABASE_URL = "https://cfxywxzrihguvcokacgw.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_qWwvrriEOPMUdgfjdOnmOA__U2RrkRU";
+        
+        // Используем _supabase, чтобы не было ошибок
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // 2. ПОЛУЧЕНИЕ ПАРАМЕТРОВ
         const urlParams = new URLSearchParams(window.location.search);
         const positions = {};
+        
+        // Отображаем цифры на картинке
         for (let i = 1; i <= 7; i++) {
             positions['p' + i] = urlParams.get('p' + i);
             if (positions['p' + i]) {
@@ -125,7 +134,6 @@
                     const arcana = positions['p' + i];
                     if (!arcana) continue;
 
-                    // Запрос к твоей таблице money_interpretations
                     const { data, error } = await _supabase
                         .from('money_interpretations')
                         .select('title, description')
@@ -134,21 +142,21 @@
                         .single();
 
                     if (data) {
+                        // ИСПРАВЛЕН ЗАГОЛОВОК: "Позиция 1: 13 Смерть"
+                        // ИСПРАВЛЕН ТЕКСТ: добавлен класс interpretation-description
                         finalHtml += `
                             <div class="interpretation-item">
-                                <span class="interpretation-title">Позиция ${i}: ${data.title}</span>
-                                <div>${data.description}</div>
+                                <span class="interpretation-title">Позиция ${i}: ${arcana} ${data.title}</span>
+                                <div class="interpretation-description">${data.description}</div>
                             </div>
                         `;
-                    } else {
-                        console.log(`Нет данных для позиции ${i} и аркана ${arcana}`);
                     }
                 }
 
                 container.innerHTML = finalHtml || "Трактовки не найдены в базе данных.";
             } catch (err) {
                 console.error(err);
-                container.innerHTML = "Ошибка при загрузке данных из Supabase.";
+                container.innerHTML = "Ошибка при загрузке данных.";
             }
         }
 
