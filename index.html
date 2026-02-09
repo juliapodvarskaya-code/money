@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Подключаем твой шрифт */
+        @font-face {
+            font-family: 'AmsterdamFour';
+            src: url('amsterdam-four_ttf.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: #b0b8d0; 
+            font-family: 'AmsterdamFour', cursive; 
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 500px; 
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .bg-image { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+        }
+
+        /* Тот самый маленький размер цифр (2.8vw) */
+        .number { 
+            position: absolute; 
+            transform: translate(-50%, -50%); 
+            font-size: 2.8vw; 
+            font-weight: normal; 
+            color: #1a1a1a; 
+            pointer-events: none;
+            line-height: 1;
+        }
+        
+        @media (min-width: 500px) { .number { font-size: 14px; } }
+
+        .content { 
+            flex-grow: 1; 
+            background: #ffffff; 
+            padding: 25px; 
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            margin-top: -15px;
+            z-index: 10;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .tabs { 
+            display: flex; 
+            background: #fff; 
+            border-top: 1px solid #eee; 
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .tab { 
+            flex: 1; 
+            padding: 18px 5px; 
+            text-align: center; 
+            font-size: 11px; 
+            color: #aaa;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: sans-serif;
+        }
+        .tab.active { 
+            color: #248bcf; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="background.png" class="bg-image">
+    <div id="numbers-overlay"></div>
+</div>
+
+<div class="content" id="text-content">
+    Загрузка данных...
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('inner', this)">ВНУТРЕННИЙ</div>
+    <div class="tab" onclick="switchTab('outer', this)">ВНЕШНИЙ</div>
+    <div class="tab" onclick="switchTab('contact', this)">ОКРУЖЕНИЕ</div>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    if(tg) tg.expand();
+
+    const positions = {
+        15: {x: 53.6, y: 43.8}, 
+        1:  {x: 46.0, y: 52.5}, 
+        2:  {x: 53.5, y: 52.5},
+        3:  {x: 61.0, y: 52.5}, 
+        4:  {x: 50.0, y: 59.5}, 
+        5:  {x: 57.0, y: 59.5}, 
+        6:  {x: 53.5, y: 66.5}, 
+        11: {x: 39.5, y: 56.5}, 
+        13: {x: 42.0, y: 62.0}, 
+        14: {x: 42.0, y: 66.8}, // Подняли чуточку выше (было 67.5)
+        12: {x: 47.0, y: 70.0}, 
+        7:  {x: 67.5, y: 56.5}, 
+        9:  {x: 64.5, y: 62.0}, 
+        10: {x: 64.5, y: 66.8}, // Подняли чуточку выше (было 67.5)
+        8:  {x: 60.0, y: 70.0}
+    };
+
+    let myData = {
+        values: {1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, 11:11, 12:12, 13:13, 14:14, 15:15},
+        texts: {
+            inner: "Описание внутренней матрицы...",
+            outer: "Описание внешних проявлений...",
+            contact: "Взаимодействие с миром..."
+        }
+    };
+
+    function render() {
+        const overlay = document.getElementById('numbers-overlay');
+        overlay.innerHTML = '';
+        for (const [id, pos] of Object.entries(positions)) {
+            const val = myData.values[id] || '';
+            overlay.innerHTML += `<div class="number" style="left:${pos.x}%; top:${pos.y}%">${val}</div>`;
+        }
+        document.getElementById('text-content').innerText = myData.texts.inner;
+    }
+
+    function switchTab(type, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('text-content').innerText = myData.texts[type];
+    }
+
+    window.onload = render;
+</script>
+</body>
+</html>
