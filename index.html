@@ -46,7 +46,7 @@
             text-align: center;
         }
 
-        /* --- ТВОИ КООРДИНАТЫ (БЕЗ ИЗМЕНЕНИЙ) --- */
+        /* --- КООРДИНАТЫ --- */
         .p7 { top: 35%; left: 52.5%; }
         .p1 { top: 50%; left: 42.5%; }
         .p2 { top: 50%; left: 52.5%; }
@@ -55,7 +55,6 @@
         .p5 { top: 61.5%; left: 58%; }
         .p6 { top: 71%; left: 52.5%; }
 
-        /* --- ТЕКСТ ТРАКТОВОК --- */
         .footer-text {
             width: 100%;
             max-width: 500px;
@@ -79,11 +78,7 @@
             font-size: 18px;
             margin-bottom: 8px;
             display: block;
-        }
-
-        .loading-text {
-            font-style: italic;
-            color: #555;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -91,7 +86,6 @@
 
     <div class="matrix-container">
         <img src="money_bg.png" alt="Money Matrix" class="background-img">
-
         <div class="number p1" id="val1"></div>
         <div class="number p2" id="val2"></div>
         <div class="number p3" id="val3"></div>
@@ -102,47 +96,37 @@
     </div>
 
     <div class="footer-text" id="interpretations-container">
-        <p class="loading-text">Загрузка трактовок ваших арканов...</p>
+        <p>Загрузка трактовок...</p>
     </div>
 
     <script>
-        // 1. НАСТРОЙКИ SUPABASE
-        const SUPABASE_URL = "https://cfxywxzrihguvcokacgw.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_qWwvrriEOPMUdgfjdOnmOA__U2RrkRU";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // 1. НАСТРОЙКИ SUPABASE (Исправлено создание клиента)
+        const SB_URL = "https://cfxywxzrihguvcokacgw.supabase.co";
+        const SB_KEY = "sb_publishable_qWwvrriEOPMUdgfjdOnmOA__U2RrkRU";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        // 2. ПОЛУЧЕНИЕ ПАРАМЕТРОВ ИЗ ССЫЛКИ
-        function getQueryParams() {
-            const params = new URLSearchParams(window.location.search);
-            const data = {};
-            for(let i = 1; i <= 7; i++) {
-                data['p' + i] = params.get('p' + i);
-            }
-            return data;
-        }
-
-        const params = getQueryParams();
-
-        // Отображаем цифры на матрице
-        for(let i = 1; i <= 7; i++) {
-            if (params['p' + i]) {
-                document.getElementById('val' + i).innerText = params['p' + i];
+        // 2. ПОЛУЧЕНИЕ ПАРАМЕТРОВ
+        const urlParams = new URLSearchParams(window.location.search);
+        const positions = {};
+        for (let i = 1; i <= 7; i++) {
+            positions['p' + i] = urlParams.get('p' + i);
+            if (positions['p' + i]) {
+                document.getElementById('val' + i).innerText = positions['p' + i];
             }
         }
 
-        // 3. ЗАГРУЗКА ТРАКТОВОК ИЗ ТАБЛИЦЫ
-        async function loadInterpretations() {
+        // 3. ЗАГРУЗКА ТРАКТОВОК
+        async function fetchAllInterpretations() {
             const container = document.getElementById('interpretations-container');
-            let htmlContent = "";
+            let finalHtml = "";
 
             try {
-                // Цикл по всем 7 позициям
                 for (let i = 1; i <= 7; i++) {
-                    const arcana = params['p' + i];
+                    const arcana = positions['p' + i];
                     if (!arcana) continue;
 
-                    // Запрос к Supabase: ищем позицию и номер аркана
-                    const { data, error } = await supabase
+                    // Запрос к твоей таблице money_interpretations
+                    const { data, error } = await _supabase
                         .from('money_interpretations')
                         .select('title, description')
                         .eq('position_number', i)
@@ -150,29 +134,29 @@
                         .single();
 
                     if (data) {
-                        htmlContent += `
+                        finalHtml += `
                             <div class="interpretation-item">
-                                <span class="interpretation-title">Позиция ${i}: ${data.title} (${arcana} аркан)</span>
+                                <span class="interpretation-title">Позиция ${i}: ${data.title}</span>
                                 <div>${data.description}</div>
                             </div>
                         `;
+                    } else {
+                        console.log(`Нет данных для позиции ${i} и аркана ${arcana}`);
                     }
                 }
 
-                container.innerHTML = htmlContent || "Трактовки не найдены. Проверьте параметры ссылки.";
-
+                container.innerHTML = finalHtml || "Трактовки не найдены в базе данных.";
             } catch (err) {
-                console.error("Ошибка загрузки:", err);
-                container.innerHTML = "Произошла ошибка при загрузке данных.";
+                console.error(err);
+                container.innerHTML = "Ошибка при загрузке данных из Supabase.";
             }
         }
 
-        if (params.p1) {
-            loadInterpretations();
+        if (urlParams.get('p1')) {
+            fetchAllInterpretations();
         } else {
-            document.getElementById('interpretations-container').innerHTML = "Введите данные в боте для получения расчета.";
+            container.innerHTML = "Данные не переданы.";
         }
     </script>
-
 </body>
 </html>
