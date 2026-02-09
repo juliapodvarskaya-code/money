@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Матрица Денег</title>
+    <style>
+        @font-face {
+            font-family: 'Amsterdam';
+            src: url('amsterdam-four_ttf.ttf') format('truetype');
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #A7B2CA; /* Твой идеальный цвет */
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .matrix-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .background-img {
+            width: 100%;
+            display: block;
+            height: auto;
+        }
+
+        .number {
+            position: absolute;
+            font-family: 'Amsterdam', cursive;
+            font-size: 18px;
+            color: #000000;
+            transform: translate(-50%, -50%);
+            font-weight: normal;
+            pointer-events: none;
+            width: 30px;
+            text-align: center;
+        }
+
+        /* --- КООРДИНАТЫ --- */
+
+        /* 7 - Верх */
+        .p7 { top: 35%; left: 52.5%; }
+
+        /* 1, 2, 3 - Ряд 1 (на высоте 50%) */
+        .p1 { top: 50%; left: 42.5%; }
+        .p2 { top: 50%; left: 52.5%; }
+        .p3 { top: 50%; left: 62.5%; }
+
+        /* 4, 5 - Ряд 2 (на высоте 61.5%) */
+        .p4 { top: 61.5%; left: 45%; }
+        .p5 { top: 61.5%; left: 58%; }
+
+        /* 6 - Низ (ПОДНЯЛ ВЫШЕ: было 72.5%, стало 71%) */
+        .p6 { top: 71%; left: 52.5%; }
+
+
+        /* --- ТЕКСТ --- */
+        .footer-text {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #000000;
+            background-color: #A7B2CA;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="matrix-container">
+        <img src="money_bg.png" alt="Money Matrix" class="background-img">
+
+        <div class="number p1" id="val1">1</div>
+        <div class="number p2" id="val2">2</div>
+        <div class="number p3" id="val3">3</div>
+        <div class="number p4" id="val4">4</div>
+        <div class="number p5" id="val5">5</div>
+        <div class="number p6" id="val6">6</div>
+        <div class="number p7" id="val7">7</div>
+    </div>
+
+    <div class="footer-text">
+        <p id="text-placeholder">
+            Здесь будет твой текст.
+        </p>
+    </div>
+
+    <script>
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                p1: params.get('p1'),
+                p2: params.get('p2'),
+                p3: params.get('p3'),
+                p4: params.get('p4'),
+                p5: params.get('p5'),
+                p6: params.get('p6'),
+                p7: params.get('p7')
+            };
+        }
+
+        const params = getQueryParams();
+
+        if (params.p1) document.getElementById('val1').innerText = params.p1;
+        if (params.p2) document.getElementById('val2').innerText = params.p2;
+        if (params.p3) document.getElementById('val3').innerText = params.p3;
+        if (params.p4) document.getElementById('val4').innerText = params.p4;
+        if (params.p5) document.getElementById('val5').innerText = params.p5;
+        if (params.p6) document.getElementById('val6').innerText = params.p6;
+        if (params.p7) document.getElementById('val7').innerText = params.p7;
+    </script>
+
+</body>
+</html>
